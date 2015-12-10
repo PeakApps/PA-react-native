@@ -241,7 +241,7 @@ public class ReactImageView extends GenericDraweeView {
   }
 
   public void maybeUpdateView() {
-    if (!mIsDirty) {
+    if (!mIsDirty || mUri == null) {
       return;
     }
 
