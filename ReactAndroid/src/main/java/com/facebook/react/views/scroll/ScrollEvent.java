@@ -37,6 +37,7 @@ public class ScrollEvent extends Event<ScrollEvent> {
   private int mScrollViewWidth;
   private int mScrollViewHeight;
   private @Nullable ScrollEventType mScrollEventType;
+  private WritableMap mUserData;
 
   public static ScrollEvent obtain(
       int viewTag,
@@ -47,7 +48,8 @@ public class ScrollEvent extends Event<ScrollEvent> {
       int contentWidth,
       int contentHeight,
       int scrollViewWidth,
-      int scrollViewHeight) {
+      int scrollViewHeight,
+      WritableMap userData) {
     ScrollEvent event = EVENTS_POOL.acquire();
     if (event == null) {
       event = new ScrollEvent();
@@ -61,7 +63,8 @@ public class ScrollEvent extends Event<ScrollEvent> {
         contentWidth,
         contentHeight,
         scrollViewWidth,
-        scrollViewHeight);
+        scrollViewHeight,
+        userData);
     return event;
   }
 
@@ -82,7 +85,8 @@ public class ScrollEvent extends Event<ScrollEvent> {
       int contentWidth,
       int contentHeight,
       int scrollViewWidth,
-      int scrollViewHeight) {
+      int scrollViewHeight,
+      WritableMap userData) {
     super.init(viewTag, timestampMs);
     mScrollEventType = scrollEventType;
     mScrollX = scrollX;
@@ -91,6 +95,7 @@ public class ScrollEvent extends Event<ScrollEvent> {
     mContentHeight = contentHeight;
     mScrollViewWidth = scrollViewWidth;
     mScrollViewHeight = scrollViewHeight;
+    mUserData = userData;
   }
 
   @Override
@@ -145,6 +150,9 @@ public class ScrollEvent extends Event<ScrollEvent> {
 
     event.putInt("target", getViewTag());
     event.putBoolean("responderIgnoreScroll", true);
+    if (mUserData != null) {
+        event.merge(mUserData);
+    }
     return event;
   }
 }

@@ -319,7 +319,8 @@ public class RecyclerViewBackedScrollView extends RecyclerView {
                 getWidth(),
                 ((ReactListAdapter) getAdapter()).getTotalChildrenHeight(),
                 getWidth(),
-                getHeight()));
+                getHeight(),
+                null));
   }
 
   private void onTotalChildrenHeightChange(int newTotalChildrenHeight) {

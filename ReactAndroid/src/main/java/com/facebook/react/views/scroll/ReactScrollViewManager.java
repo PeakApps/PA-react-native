@@ -105,6 +105,8 @@ public class ReactScrollViewManager
         .put(ScrollEventType.ANIMATION_END.getJSEventName(), MapBuilder.of("registrationName", "onScrollAnimationEnd"))
         .put(ScrollEventType.MOMENTUM_BEGIN.getJSEventName(), MapBuilder.of("registrationName", "onMomentumScrollBegin"))
         .put(ScrollEventType.MOMENTUM_END.getJSEventName(), MapBuilder.of("registrationName", "onMomentumScrollEnd"))
+        .put(OverScrollEvent.EVENT_NAME, MapBuilder.of("registrationName", "onOverScroll"))
+        .put(OverScrollEndedEvent.EVENT_NAME, MapBuilder.of("registrationName", "onOverScrollEnded"))
         .build();
   }
 }

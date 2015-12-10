@@ -17,11 +17,17 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.uimanager.MeasureSpecAssertions;
 import com.facebook.react.uimanager.events.NativeGestureUtil;
 import com.facebook.react.views.view.ReactClippingViewGroup;
 import com.facebook.react.views.view.ReactClippingViewGroupHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Similar to {@link ReactScrollView} but only supports horizontal scrolling.
@@ -30,6 +36,7 @@ public class ReactHorizontalScrollView extends HorizontalScrollView implements
     ReactClippingViewGroup {
 
   private final OnScrollDispatchHelper mOnScrollDispatchHelper = new OnScrollDispatchHelper();
+  private List<Rect> mCachedChildFrames;
 
   private boolean mRemoveClippedSubviews;
   private boolean mSendMomentumEvents;
@@ -41,6 +48,7 @@ public class ReactHorizontalScrollView extends HorizontalScrollView implements
 
   public ReactHorizontalScrollView(Context context) {
     super(context);
+    mCachedChildFrames = new ArrayList<Rect>();
   }
 
   @Override
@@ -81,13 +89,22 @@ public class ReactHorizontalScrollView extends HorizontalScrollView implements
     super.onScrollChanged(x, y, oldX, oldY);
 
     if (mOnScrollDispatchHelper.onScrollChanged(x, y)) {
+
+      WritableArray childFrames = ReactScrollViewHelper.calculateChildFramesData(this, mCachedChildFrames);
+      WritableMap userData = Arguments.createMap();
+      userData.putArray("updatedChildFrames", childFrames);	
+
+      ReactScrollViewHelper.emitScrollEvent(this, x, y, userData);
+
+		//** PA **
+		// Possible merge/rebase issue:
       if (mRemoveClippedSubviews) {
         updateClippingRect();
-      }
+    }
 
       if (mFlinging) {
         mDoneFlinging = false;
-      }
+  }
 
       ReactScrollViewHelper.emitScrollEvent(this);
     }
@@ -111,7 +128,7 @@ public class ReactHorizontalScrollView extends HorizontalScrollView implements
     if (action == MotionEvent.ACTION_UP && mDragging) {
       ReactScrollViewHelper.emitScrollEndDragEvent(this);
       mDragging = false;
-    }
+}
     return super.onTouchEvent(ev);
   }
 

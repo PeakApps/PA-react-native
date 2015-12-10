@@ -55,12 +55,16 @@ var PropTypes = React.PropTypes;
 var SCREEN_WIDTH = Dimensions.get('window').width;
 var SCREEN_HEIGHT = Dimensions.get('window').height;
 var SCENE_DISABLED_NATIVE_PROPS = {
-  pointerEvents: 'none',
-  style: {
-    top: SCREEN_HEIGHT,
-    bottom: -SCREEN_HEIGHT,
-    opacity: 0,
-  },
+   pointerEvents: 'none',
+};
+
+var SCENE_HIDDEN_NATIVE_PROPS = {
+   pointerEvents: 'none',
+   style: {
+     top: SCREEN_HEIGHT,
+     bottom: -SCREEN_HEIGHT,
+     opacity: 0,
+   },
 };
 
 var __uid = 0;
@@ -256,6 +260,11 @@ var Navigator = React.createClass({
      * Styles to apply to the container of each scene
      */
     sceneStyle: View.propTypes.style,
+
+     /**
+     * A callback deciding whether to hide and disable a scene, or just disable it.
+     */
+    onHideScene: PropTypes.func,
   },
 
   statics: {
@@ -537,8 +546,9 @@ var Navigator = React.createClass({
    * Push a scene off the screen, so that opacity:0 scenes will not block touches sent to the presented scenes
    */
   _disableScene: function(sceneIndex) {
+    var hide = this.props.onHideScene ? this.props.onHideScene(this.state.routeStack[sceneIndex]) : true;
     this.refs['scene_' + sceneIndex] &&
-      this.refs['scene_' + sceneIndex].setNativeProps(SCENE_DISABLED_NATIVE_PROPS);
+        this.refs['scene_' + sceneIndex].setNativeProps(hide ? SCENE_HIDDEN_NATIVE_PROPS : SCENE_DISABLED_NATIVE_PROPS);
   },
 
   /**

@@ -15,13 +15,21 @@ import java.util.Map;
 
 import android.graphics.Color;
 
+import android.graphics.drawable.Animatable;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.AbstractDraweeControllerBuilder;
+import com.facebook.drawee.controller.ControllerListener;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.common.MapBuilder;
+import com.facebook.react.uimanager.*;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewProps;
+
+import java.lang.ref.WeakReference;
+import java.util.Map;
 
 public class ReactImageManager extends SimpleViewManager<ReactImageView> {
 
@@ -65,6 +73,22 @@ public class ReactImageManager extends SimpleViewManager<ReactImageView> {
         context,
         getDraweeControllerBuilder(),
         getCallerContext());
+  }
+
+  @Override
+  protected void addEventEmitters(final ThemedReactContext reactContext, final ReactImageView view) {
+    super.addEventEmitters(reactContext, view);
+    view.setControllerListener(new ImageControllerListener(reactContext, view));
+  }
+
+  @Override
+  public @Nullable
+  Map getExportedCustomDirectEventTypeConstants() {
+    return MapBuilder.builder()
+            .put(OnLoadStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onLoadStart"))
+            .put(OnLoadEvent.EVENT_NAME, MapBuilder.of("registrationName", "onLoad"))
+            .put(OnErrorEvent.EVENT_NAME, MapBuilder.of("registrationName", "onError"))
+            .build();
   }
 
   // In JS this is Image.props.source.uri
@@ -144,4 +168,59 @@ public class ReactImageManager extends SimpleViewManager<ReactImageView> {
     super.onAfterUpdateTransaction(view);
     view.maybeUpdateView();
   }
+
+  private static class ImageControllerListener implements ControllerListener {
+
+    private WeakReference<ReactImageView> mImageViewWeakReference;
+    private WeakReference<ReactContext> mReactContextWeakReference;
+
+    private ImageControllerListener(ReactContext context, ReactImageView imageView) {
+      mImageViewWeakReference = new WeakReference<ReactImageView>(imageView);
+      mReactContextWeakReference = new WeakReference<ReactContext>(context);
+    }
+
+    @Override
+    public void onSubmit(String id, Object callerContext) {
+      ReactContext reactContext = mReactContextWeakReference.get();
+      ReactImageView view = mImageViewWeakReference.get();
+      if (reactContext != null && view != null) {
+        reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(new OnLoadStartEvent(view.getId(), System.currentTimeMillis()));
+      }
+    }
+
+    @Override
+    public void onFinalImageSet(String id, @Nullable Object imageInfo, @Nullable Animatable animatable) {
+      ReactContext reactContext = mReactContextWeakReference.get();
+      ReactImageView view = mImageViewWeakReference.get();
+      if (reactContext != null && view != null) {
+        reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(new OnLoadEvent(view.getId(), System.currentTimeMillis()));
+      }
+    }
+
+    @Override
+    public void onIntermediateImageSet(String id, @Nullable Object imageInfo) {
+
+    }
+
+    @Override
+    public void onIntermediateImageFailed(String id, Throwable throwable) {
+
+    }
+
+    @Override
+    public void onFailure(String id, Throwable throwable) {
+      ReactContext reactContext = mReactContextWeakReference.get();
+      ReactImageView view = mImageViewWeakReference.get();
+      if (reactContext != null && view != null) {
+        reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(new OnErrorEvent(view.getId(), System.currentTimeMillis(), throwable.getLocalizedMessage()));
+      }
+    }
+
+    @Override
+    public void onRelease(String id) {
+
+    }
+
+  }
+
 }

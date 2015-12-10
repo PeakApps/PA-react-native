@@ -212,6 +212,13 @@ var ListView = React.createClass({
      * @platform ios
      */
     stickyHeaderIndices: PropTypes.arrayOf(PropTypes.number),
+
+     /**
+      * An experimental mode allowing all rows to be rendered upon a
+      * ListView render.  Use at your own risk.
+      */
+     refreshRowsOnRender: React.PropTypes.bool,
+
   },
 
   /**
@@ -297,8 +304,8 @@ var ListView = React.createClass({
         this._prevRenderedRowsCount = 0;
         return {
           curRenderedRowsCount: Math.min(
-            state.curRenderedRowsCount + props.pageSize,
-            props.dataSource.getRowCount()
+          state.curRenderedRowsCount + props.pageSize,
+          props.dataSource.getRowCount()
           ),
         };
       });
@@ -345,7 +352,8 @@ var ListView = React.createClass({
       }
 
       if (this.props.renderSectionHeader) {
-        var shouldUpdateHeader = rowCount >= this._prevRenderedRowsCount &&
+        var shouldUpdateHeader = rowCount >= s.props.refreshRowsOnRender || 
+          this.state.prevRenderedRowsCount &&
           dataSource.sectionHeaderShouldUpdate(sectionIdx);
         bodyComponents.push(
           <StaticRenderer
@@ -364,8 +372,7 @@ var ListView = React.createClass({
       for (var rowIdx = 0; rowIdx < rowIDs.length; rowIdx++) {
         var rowID = rowIDs[rowIdx];
         var comboID = sectionID + '_' + rowID;
-        var shouldUpdateRow = rowCount >= this._prevRenderedRowsCount &&
-          dataSource.rowShouldUpdate(sectionIdx, rowIdx);
+        var shouldUpdateRow = (this.props.refreshRowsOnRender /*&& this._visibleRows != undefined && this._visibleRows[sectionID] != undefined && this._visibleRows[sectionID][rowID] != undefined && this._visibleRows[sectionID][rowID] == true*/)
         var row =
           <StaticRenderer
             key={'r_' + comboID}
@@ -459,8 +466,8 @@ var ListView = React.createClass({
     var contentLength = !this.props.horizontal ? height : width;
     if (contentLength !== this.scrollProperties.contentLength) {
       this.scrollProperties.contentLength = contentLength;
-      this._updateVisibleRows();
-      this._renderMoreRowsIfNeeded();
+    this._updateVisibleRows();
+    this._renderMoreRowsIfNeeded();
     }
     this.props.onContentSizeChange && this.props.onContentSizeChange(width, height);
   },
@@ -470,8 +477,8 @@ var ListView = React.createClass({
     var visibleLength = !this.props.horizontal ? height : width;
     if (visibleLength !== this.scrollProperties.visibleLength) {
       this.scrollProperties.visibleLength = visibleLength;
-      this._updateVisibleRows();
-      this._renderMoreRowsIfNeeded();
+    this._updateVisibleRows();
+    this._renderMoreRowsIfNeeded();
     } 
     this.props.onLayout && this.props.onLayout(event);
   },
@@ -495,7 +502,7 @@ var ListView = React.createClass({
       this._maybeCallOnEndReached();
       return;
     }
- 
+
     var distanceFromEnd = this._getDistanceFromEnd(this.scrollProperties);
     if (distanceFromEnd < this.props.scrollRenderAheadDistance) {
       this._pageInNewRows();
