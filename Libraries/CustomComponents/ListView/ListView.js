@@ -372,7 +372,8 @@ var ListView = React.createClass({
       for (var rowIdx = 0; rowIdx < rowIDs.length; rowIdx++) {
         var rowID = rowIDs[rowIdx];
         var comboID = sectionID + '_' + rowID;
-        var shouldUpdateRow = (this.props.refreshRowsOnRender /*&& this._visibleRows != undefined && this._visibleRows[sectionID] != undefined && this._visibleRows[sectionID][rowID] != undefined && this._visibleRows[sectionID][rowID] == true*/)
+        var shouldUpdateRow = (this.props.refreshRowsOnRender || (this._visibleRows != undefined && this._visibleRows[sectionID] != undefined && this._visibleRows[sectionID][rowID] != undefined && this._visibleRows[sectionID][rowID] == true)) ||
+          dataSource.rowShouldUpdate(sectionIdx, rowIdx);
         var row =
           <StaticRenderer
             key={'r_' + comboID}
