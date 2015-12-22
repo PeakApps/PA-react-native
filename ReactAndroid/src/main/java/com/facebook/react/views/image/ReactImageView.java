@@ -230,6 +230,10 @@ public class ReactImageView extends GenericDraweeView {
     mIsDirty = true;
   }
 
+    public Uri getSource() {
+        return mUri;
+    }
+
   public void setProgressiveRenderingEnabled(boolean enabled) {
     mProgressiveRenderingEnabled = enabled;
     // no worth marking as dirty if it already rendered..
@@ -327,14 +331,14 @@ public class ReactImageView extends GenericDraweeView {
    */
   @Override
   public boolean hasOverlappingRendering() {
-    return false;
+    return true;
   }
 
   private static boolean shouldResize(@Nullable Uri uri) {
     // Resizing is inferior to scaling. See http://frescolib.org/docs/resizing-rotating.html#_
     // We resize here only for images likely to be from the device's camera, where the app developer
     // has no control over the original size
-    return uri != null && (UriUtil.isLocalContentUri(uri) || UriUtil.isLocalFileUri(uri));
+    return uri != null;// && (UriUtil.isLocalContentUri(uri) || UriUtil.isLocalFileUri(uri));
   }
 
   private static int getResourceDrawableId(Context context, @Nullable String name) {
