@@ -98,11 +98,11 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
         updateClippingRect();
       }
 
-      WritableArray childFrames = ReactScrollViewHelper.calculateChildFramesData(this, mCachedChildFrames);
-      WritableMap userData = Arguments.createMap();
-      userData.putArray("updatedChildFrames", childFrames);
+//      WritableArray childFrames = ReactScrollViewHelper.calculateChildFramesData(this, mCachedChildFrames);
+//      WritableMap userData = Arguments.createMap();
+//      userData.putArray("updatedChildFrames", childFrames);
 
-      ReactScrollViewHelper.emitScrollEvent(this, x, y, userData);
+      ReactScrollViewHelper.emitScrollEvent(this, x, y, null);
 
 	// ** PA **
 	// Possible merge/rebase issue:
@@ -142,7 +142,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
             } else {
               mOverScrollDistance += (ev.getRawY() - mStartY);
             }
-            ReactScrollViewHelper.emitOverScrollEvent(this, 0, mOverScrollDistance);
+            ReactScrollViewHelper.emitOverScrollEvent(this, 0, mOverScrollDistance, overScrollDown);
           }
           mStartY = ev.getRawY();
           return true;

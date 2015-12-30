@@ -14,11 +14,13 @@ public class OverScrollEvent extends Event<OverScrollEvent> {
 
     private float mOverScrollX;
     private float mOverScrollY;
+    private boolean mDown;
 
-    public OverScrollEvent(int viewTag, long timestampMs, float overScrollX, float overScrollY) {
+    public OverScrollEvent(int viewTag, long timestampMs, float overScrollX, float overScrollY, boolean down) {
         super(viewTag, timestampMs);
         mOverScrollX = overScrollX;
         mOverScrollY = overScrollY;
+        mDown = down;
     }
 
     @Override
@@ -32,6 +34,7 @@ public class OverScrollEvent extends Event<OverScrollEvent> {
         eventData.putInt("target", getViewTag());
         eventData.putDouble("overScrollX", mOverScrollX);
         eventData.putDouble("overScrollY", mOverScrollY);
+        eventData.putBoolean("overScrollDown", mDown);
         rctEventEmitter.receiveEvent(getViewTag(), getEventName(), eventData);
     }
 }
