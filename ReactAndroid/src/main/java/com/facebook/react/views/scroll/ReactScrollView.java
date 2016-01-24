@@ -14,14 +14,12 @@ import javax.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.support.v4.view.ViewCompat;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.ScrollView;
 
-import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.WritableArray;
-import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.MeasureSpecAssertions;
 import com.facebook.react.uimanager.events.NativeGestureUtil;
 import com.facebook.react.views.view.ReactClippingViewGroup;
@@ -51,10 +49,19 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   private List<Rect> mCachedChildFrames;
 
   private float mInitialY;
+  private float mInitialX;
   private float mStartY = -1f;
-  private float mOverScrollDistance;
+  private float mStartX = -1f;
+  private float mOverScrollDistanceY;
+  private float mOverScrollDistanceX;
 
   private float mTouchSlop;
+
+  private boolean mOverScrollY = true;
+  private boolean mOverScrollX = false;
+
+  private boolean mCurrentTouchPassedYThreshold = false;
+  private boolean mCurrentTouchPassedXThreshold = false;
 
   public ReactScrollView(Context context) {
     super(context);
@@ -118,6 +125,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   public boolean onInterceptTouchEvent(MotionEvent ev) {
     if (super.onInterceptTouchEvent(ev)) {
       mInitialY = ev.getRawY();
+      mInitialX = ev.getRawX();
       NativeGestureUtil.notifyNativeGestureStarted(this, ev);
       ReactScrollViewHelper.emitScrollBeginDragEvent(this);
       mDragging = true;
@@ -131,35 +139,74 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   public boolean onTouchEvent(MotionEvent ev) {
 
     if (ev.getActionMasked() == MotionEvent.ACTION_MOVE) {
-      boolean overScrollDown = (getChildAt(0).getHeight() - getScrollY()) == getHeight();
-      if (!ViewCompat.canScrollVertically(this, -1) || getScrollY() == 0 || (overScrollDown)) {
-        float dragDistance = mInitialY - ev.getRawY();
-        if (dragDistance < -mTouchSlop || (overScrollDown && dragDistance > mTouchSlop)) {
-          //overscroll handled here.
-          if (mStartY != -1f) {
-            if (overScrollDown) {
-              mOverScrollDistance += (mStartY - ev.getRawY());
-            } else {
-              mOverScrollDistance += (ev.getRawY() - mStartY);
+
+      if (Math.abs(mInitialY - ev.getRawY()) > mTouchSlop && !mCurrentTouchPassedXThreshold) {
+        mCurrentTouchPassedYThreshold = true;
+      }
+
+      if (Math.abs(mInitialX - ev.getRawX()) > mTouchSlop && !mCurrentTouchPassedYThreshold) {
+        mCurrentTouchPassedXThreshold = true;
+      }
+
+      if (mOverScrollY) {
+        boolean overScrollDown = (getChildAt(0).getHeight() - getScrollY()) == getHeight();
+        if (!ViewCompat.canScrollVertically(this, -1) || getScrollY() == 0 || (overScrollDown)) {
+          float dragDistance = mInitialY - ev.getRawY();
+          if (dragDistance < -mTouchSlop || (overScrollDown && dragDistance > mTouchSlop)) {
+            //overscroll handled here.
+            if (mStartY != -1f) {
+              if (overScrollDown) {
+                mOverScrollDistanceY += (mStartY - ev.getRawY());
+              } else {
+                mOverScrollDistanceY += (ev.getRawY() - mStartY);
+              }
+              ReactScrollViewHelper.emitOverScrollEvent(this, 0, mOverScrollDistanceY, overScrollDown);
             }
-            ReactScrollViewHelper.emitOverScrollEvent(this, 0, mOverScrollDistance, overScrollDown);
+            mStartY = ev.getRawY();
+            return true;
           }
-          mStartY = ev.getRawY();
+        } else {
+          mStartY = -1f;
+          mOverScrollDistanceY = 0f;
+        }
+      }
+
+
+      if (mOverScrollX && !mCurrentTouchPassedYThreshold) {
+        float dragDistance = mInitialX - ev.getRawX();
+        if (dragDistance < -mTouchSlop) {
+          if (mStartX != -1f) {
+            mOverScrollDistanceX += (ev.getRawX() - mStartX);
+          }
+          mStartX = ev.getRawX();
+          Log.v(this.getClass().getName(), "current overscroll on x axis = " + mOverScrollDistanceX);
+          ReactScrollViewHelper.emitOverScrollEvent(this, mOverScrollDistanceX, 0f, false);
+          //mCurrentTouchPassedXThreshold
           return true;
         }
-      } else {
-        mStartY = -1f;
-        mOverScrollDistance = 0f;
+
       }
+
+
+
+
     }
 
 
     if (ev.getActionMasked() == MotionEvent.ACTION_UP || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
       mStartY = -1f;
-      if (mOverScrollDistance > 0f) {
+      mCurrentTouchPassedYThreshold = false;
+      mCurrentTouchPassedXThreshold = false;
+      mStartX = -1f;
+      if (mOverScrollY && mOverScrollDistanceY > 0f) {
         ReactScrollViewHelper.emitOverScrollEndedEvent(this);
 		mDragging = false;
         mOverScrollDistance = 0f;
+        return true;
+      }
+      if (mOverScrollX && mOverScrollDistanceX > 0f) {
+        ReactScrollViewHelper.emitOverScrollEndedEvent(this);
+        mOverScrollDistanceX = 0f;
         return true;
       }
     }
@@ -183,7 +230,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
       mClippingRect = new Rect();
     }
     mRemoveClippedSubviews = removeClippedSubviews;
-    updateClippingRect();
+      updateClippingRect();
   }
 
   @Override
@@ -211,6 +258,10 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
     outClippingRect.set(Assertions.assertNotNull(mClippingRect));
   }
 
+  public void setOverScrollY(boolean overScrollY) {
+    mOverScrollY = overScrollY;
+  }
+
   @Override
   public void fling(int velocityY) {
     super.fling(velocityY);
@@ -226,7 +277,6 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
           } else {
             mDoneFlinging = true;
             ReactScrollView.this.postOnAnimationDelayed(this, ReactScrollViewHelper.MOMENTUM_DELAY);
-}
         }
       };
       postOnAnimationDelayed(r, ReactScrollViewHelper.MOMENTUM_DELAY);

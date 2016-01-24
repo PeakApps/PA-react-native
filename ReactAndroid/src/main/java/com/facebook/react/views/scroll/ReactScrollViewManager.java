@@ -92,6 +92,20 @@ public class ReactScrollViewManager
     scrollView.scrollTo(data.mDestX, data.mDestY);
   }
 
+
+    @ReactProp(name = "overScrollY")
+    public void canOverScrollY(ReactScrollView reactScrollView, boolean canOverScrollY) {
+        reactScrollView.setOverScrollY(canOverScrollY);
+    }
+
+    @ReactProp(name = "overScrollX")
+    public void canOverScrollX(ReactScrollView reactScrollView, boolean canOverScrollX) {
+        reactScrollView.setOverScrollX(canOverScrollX);
+    }
+
+
+
+
   @Override
   public @Nullable Map getExportedCustomDirectEventTypeConstants() {
     return createExportedCustomDirectEventTypeConstants();
