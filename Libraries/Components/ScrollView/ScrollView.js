@@ -307,6 +307,17 @@ var ScrollView = React.createClass({
      * @platform ios
      */
     onRefreshStart: PropTypes.func,
+    /**
+     * When set to true, overscroll events on the Y axis will be notified
+     * @platform android
+     */
+    overScrollY: PropTypes.bool,
+    /**
+     * When set to true, overscroll events on the X axis will be notified
+     * @platform android
+     */
+    overScrollX: PropTypes.bool,
+
   },
 
   mixins: [ScrollResponder.Mixin],
@@ -447,7 +458,7 @@ var ScrollView = React.createClass({
     var onRefreshStart = this.props.onRefreshStart;
     if (onRefreshStart) {
       console.warn('onRefreshStart is deprecated. Use the refreshControl prop instead.');
-      // this is necessary because if we set it on props, even when empty,
+    // this is necessary because if we set it on props, even when empty,
       // it'll trigger the default pull-to-refresh behavior on native.
       props.onRefreshStart =
         function() { onRefreshStart && onRefreshStart(this.endRefreshing); }.bind(this);
@@ -472,12 +483,12 @@ var ScrollView = React.createClass({
     if (refreshControl) {
       if (Platform.OS === 'ios') {
         // On iOS the RefreshControl is a child of the ScrollView.
-        return (
-          <ScrollViewClass {...props} ref={SCROLLVIEW}>
+    return (
+      <ScrollViewClass {...props} ref={SCROLLVIEW}>
             {refreshControl}
-            {contentContainer}
-          </ScrollViewClass>
-        );
+        {contentContainer}
+      </ScrollViewClass>
+    );
       } else if (Platform.OS === 'android') {
         // On Android wrap the ScrollView with a AndroidSwipeRefreshLayout.
         // Since the ScrollView is wrapped add the style props to the
@@ -493,7 +504,7 @@ var ScrollView = React.createClass({
             </ScrollViewClass>
           </AndroidSwipeRefreshLayout>
         );
-      }
+  }
     }
     return (
       <ScrollViewClass {...props} ref={SCROLLVIEW}>
