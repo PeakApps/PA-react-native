@@ -63,6 +63,8 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   private boolean mCurrentTouchPassedYThreshold = false;
   private boolean mCurrentTouchPassedXThreshold = false;
 
+  private boolean mOverscrollXStarted = false;
+
   public ReactScrollView(Context context) {
     super(context);
     mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
@@ -78,8 +80,8 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
     MeasureSpecAssertions.assertExplicitMeasureSpec(widthMeasureSpec, heightMeasureSpec);
 
     setMeasuredDimension(
-        MeasureSpec.getSize(widthMeasureSpec),
-        MeasureSpec.getSize(heightMeasureSpec));
+            MeasureSpec.getSize(widthMeasureSpec),
+            MeasureSpec.getSize(heightMeasureSpec));
   }
 
   @Override
@@ -123,23 +125,37 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
 
   @Override
   public boolean onInterceptTouchEvent(MotionEvent ev) {
-    if (super.onInterceptTouchEvent(ev)) {
+    boolean superHandled = false;
+    if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
       mInitialY = ev.getRawY();
       mInitialX = ev.getRawX();
+    }
+    if (super.onInterceptTouchEvent(ev)) {
       NativeGestureUtil.notifyNativeGestureStarted(this, ev);
-      ReactScrollViewHelper.emitScrollBeginDragEvent(this);
-      mDragging = true;
-      return true;
+      superHandled = true;
+    } else if (mOverScrollX && ev.getActionMasked() == MotionEvent.ACTION_MOVE && Math.abs(mInitialX - ev.getRawX()) > mTouchSlop && !mCurrentTouchPassedYThreshold) {
+      NativeGestureUtil.notifyNativeGestureStarted(this, ev);
+      superHandled = true;
+    }
+    if (ev.getActionMasked() == MotionEvent.ACTION_UP || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+      mStartY = -1f;
+      mCurrentTouchPassedYThreshold = false;
+      mCurrentTouchPassedXThreshold = false;
+      mStartX = -1f;
     }
 
-    return false;
+	// ** PA **
+	// Possible merge issue:
+	if ( superHandled )
+	{
+		mDragging = true;
+	}
+    return superHandled;
   }
 
   @Override
   public boolean onTouchEvent(MotionEvent ev) {
-
     if (ev.getActionMasked() == MotionEvent.ACTION_MOVE) {
-
       if (Math.abs(mInitialY - ev.getRawY()) > mTouchSlop && !mCurrentTouchPassedXThreshold) {
         mCurrentTouchPassedYThreshold = true;
       }
@@ -147,13 +163,11 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
       if (Math.abs(mInitialX - ev.getRawX()) > mTouchSlop && !mCurrentTouchPassedYThreshold) {
         mCurrentTouchPassedXThreshold = true;
       }
-
       if (mOverScrollY) {
         boolean overScrollDown = (getChildAt(0).getHeight() - getScrollY()) == getHeight();
         if (!ViewCompat.canScrollVertically(this, -1) || getScrollY() == 0 || (overScrollDown)) {
           float dragDistance = mInitialY - ev.getRawY();
           if (dragDistance < -mTouchSlop || (overScrollDown && dragDistance > mTouchSlop)) {
-            //overscroll handled here.
             if (mStartY != -1f) {
               if (overScrollDown) {
                 mOverScrollDistanceY += (mStartY - ev.getRawY());
@@ -170,29 +184,21 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
           mOverScrollDistanceY = 0f;
         }
       }
-
-
       if (mOverScrollX && !mCurrentTouchPassedYThreshold) {
         float dragDistance = mInitialX - ev.getRawX();
         if (dragDistance < -mTouchSlop) {
+          mOverscrollXStarted = true;
+        }
+        if (mOverscrollXStarted) {
           if (mStartX != -1f) {
             mOverScrollDistanceX += (ev.getRawX() - mStartX);
           }
           mStartX = ev.getRawX();
-          Log.v(this.getClass().getName(), "current overscroll on x axis = " + mOverScrollDistanceX);
           ReactScrollViewHelper.emitOverScrollEvent(this, mOverScrollDistanceX, 0f, false);
-          //mCurrentTouchPassedXThreshold
           return true;
         }
-
       }
-
-
-
-
     }
-
-
     if (ev.getActionMasked() == MotionEvent.ACTION_UP || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
       mStartY = -1f;
       mCurrentTouchPassedYThreshold = false;
@@ -204,13 +210,13 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
         mOverScrollDistance = 0f;
         return true;
       }
-      if (mOverScrollX && mOverScrollDistanceX > 0f) {
+      if (mOverScrollX && mOverscrollXStarted) {
         ReactScrollViewHelper.emitOverScrollEndedEvent(this);
         mOverScrollDistanceX = 0f;
+        mOverscrollXStarted = false;
         return true;
       }
     }
-
 	//** PA **
 	// Possible merge/rebase issue:
     int action = ev.getAction() & MotionEvent.ACTION_MASK;
@@ -277,9 +283,9 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
           } else {
             mDoneFlinging = true;
             ReactScrollView.this.postOnAnimationDelayed(this, ReactScrollViewHelper.MOMENTUM_DELAY);
-        }
+  }
       };
       postOnAnimationDelayed(r, ReactScrollViewHelper.MOMENTUM_DELAY);
-    }
+}
   }
 }
