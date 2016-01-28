@@ -111,7 +111,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
 //      WritableMap userData = Arguments.createMap();
 //      userData.putArray("updatedChildFrames", childFrames);
 
-      ReactScrollViewHelper.emitScrollEvent(this, x, y, null);
+     // ReactScrollViewHelper.emitScrollEvent(this, x, y, null);
 
 	// ** PA **
 	// Possible merge/rebase issue:
@@ -207,7 +207,10 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
       if (mOverScrollY && mOverScrollDistanceY > 0f) {
         ReactScrollViewHelper.emitOverScrollEndedEvent(this);
 		mDragging = false;
-        mOverScrollDistance = 0f;
+
+        // ** PA **
+        // Possible merge issue (ADDED "Y")
+        mOverScrollDistanceY = 0f;
         return true;
       }
       if (mOverScrollX && mOverscrollXStarted) {
@@ -267,6 +270,9 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   public void setOverScrollY(boolean overScrollY) {
     mOverScrollY = overScrollY;
   }
+  public void setOverScrollX(boolean overScrollY) {
+    mOverScrollX = overScrollY;
+  }
 
   @Override
   public void fling(int velocityY) {
@@ -284,7 +290,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
             mDoneFlinging = true;
             ReactScrollView.this.postOnAnimationDelayed(this, ReactScrollViewHelper.MOMENTUM_DELAY);
   }
-      };
+      }};
       postOnAnimationDelayed(r, ReactScrollViewHelper.MOMENTUM_DELAY);
 }
   }

@@ -81,15 +81,19 @@ public class ReactImageManager extends SimpleViewManager<ReactImageView> {
     view.setControllerListener(new ImageControllerListener(reactContext, view));
   }
 
-  @Override
-  public @Nullable
-  Map getExportedCustomDirectEventTypeConstants() {
-    return MapBuilder.builder()
-            .put(OnLoadStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onLoadStart"))
-            .put(OnLoadEvent.EVENT_NAME, MapBuilder.of("registrationName", "onLoad"))
-            .put(OnErrorEvent.EVENT_NAME, MapBuilder.of("registrationName", "onError"))
-            .build();
-  }
+  // ** PA **
+  // Possible merge issue:
+
+//
+//  @Override
+//  public @Nullable
+//  Map getExportedCustomDirectEventTypeConstants() {
+//    return MapBuilder.builder()
+//            .put(OnLoadStartEvent.EVENT_NAME, MapBuilder.of("registrationName", "onLoadStart"))
+//            .put(OnLoadEvent.EVENT_NAME, MapBuilder.of("registrationName", "onLoad"))
+//            .put(OnErrorEvent.EVENT_NAME, MapBuilder.of("registrationName", "onError"))
+//            .build();
+//  }
 
   // In JS this is Image.props.source.uri
   @ReactProp(name = "src")

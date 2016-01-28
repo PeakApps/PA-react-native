@@ -90,11 +90,11 @@ public class ReactHorizontalScrollView extends HorizontalScrollView implements
 
     if (mOnScrollDispatchHelper.onScrollChanged(x, y)) {
 
-      WritableArray childFrames = ReactScrollViewHelper.calculateChildFramesData(this, mCachedChildFrames);
-      WritableMap userData = Arguments.createMap();
-      userData.putArray("updatedChildFrames", childFrames);	
+//      WritableArray childFrames = ReactScrollViewHelper.calculateChildFramesData(this, mCachedChildFrames);
+//      WritableMap userData = Arguments.createMap();
+//      userData.putArray("updatedChildFrames", childFrames);
 
-      ReactScrollViewHelper.emitScrollEvent(this, x, y, userData);
+     // ReactScrollViewHelper.emitScrollEvent(this, x, y, userData);
 
 		//** PA **
 		// Possible merge/rebase issue:
