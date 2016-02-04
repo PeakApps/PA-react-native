@@ -57,21 +57,38 @@ import com.facebook.react.modules.clipboard.ClipboardModule;
  */
 public class MainReactPackage implements ReactPackage {
 
+  /**
+   * Controls Whether to use the fresco module or not. not using it means the application needs to Fresco->init
+   */
+  private boolean mFresco = true;
+
+  public MainReactPackage() {
+    super();
+  }
+
+  public MainReactPackage(boolean fresco) {
+    this();
+    mFresco = fresco;
+  }
+
   @Override
   public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-    return Arrays.<NativeModule>asList(
-      new AppStateModule(reactContext),
-      new AsyncStorageModule(reactContext),
-      new CameraRollManager(reactContext),
-      new ClipboardModule(reactContext),
-      new DialogModule(reactContext),
-      new FrescoModule(reactContext),
-      new IntentModule(reactContext),
-      new LocationModule(reactContext),
-      new NetworkingModule(reactContext),
-      new NetInfoModule(reactContext),
-      new ToastModule(reactContext),
-      new WebSocketModule(reactContext));
+    List<NativeModule> nativeModules = Arrays.<NativeModule>asList(
+            new AppStateModule(reactContext),
+            new AsyncStorageModule(reactContext),
+            new CameraRollManager(reactContext),
+            new ClipboardModule(reactContext),
+            new DialogModule(reactContext),
+            new IntentModule(reactContext),
+            new LocationModule(reactContext),
+            new NetworkingModule(reactContext),
+            new NetInfoModule(reactContext),
+            new ToastModule(reactContext),
+            new WebSocketModule(reactContext));
+    if (mFresco) {
+      nativeModules.add(new FrescoModule(reactContext));
+    }
+    return nativeModules;
   }
 
   @Override
