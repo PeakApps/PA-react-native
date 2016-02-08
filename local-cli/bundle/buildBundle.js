@@ -13,6 +13,7 @@ const outputBundle = require('./output/bundle');
 const Promise = require('promise');
 const ReactPackager = require('../../packager/react-packager');
 const saveAssets = require('./saveAssets');
+const path = require('path');
 
 function buildBundle(args, config, output = outputBundle) {
   return new Promise((resolve, reject) => {
@@ -88,6 +89,10 @@ function buildBundle(args, config, output = outputBundle) {
     // When we're done saving bundle output and the assets, we're done.
     resolve(assets);
   });
+}
+
+function argToArray(arg) {
+  return Array.isArray(arg) ? arg : arg.split(',');
 }
 
 module.exports = buildBundle;
