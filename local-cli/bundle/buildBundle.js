@@ -21,9 +21,26 @@ function buildBundle(args, config, output = outputBundle) {
     // have other choice than defining it as an env variable here.
     process.env.NODE_ENV = args.dev ? 'development' : 'production';
 
+    args.projectRoots = args.projectRoots
+      ? argToArray(args.projectRoots)
+      : config.getProjectRoots();
+
+    if (args.root) {
+      const additionalRoots = argToArray(args.root);
+      additionalRoots.forEach(root => {
+        args.projectRoots.push(path.resolve(root));
+      });
+    }
+
+    args.assetRoots = args.assetRoots
+      ? argToArray(args.assetRoots).map(dir =>
+        path.resolve(process.cwd(), dir)
+      )
+      : config.getAssetRoots();
+
     const options = {
-      projectRoots: config.getProjectRoots(),
-      assetRoots: config.getAssetRoots(),
+      projectRoots: args.projectRoots,
+      assetRoots: args.assetRoots,
       blacklistRE: config.getBlacklistRE(),
       getTransformOptionsModulePath: config.getTransformOptionsModulePath,
       transformModulePath: args.transformer,
