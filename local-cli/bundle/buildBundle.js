@@ -90,4 +90,8 @@ function buildBundle(args, config, output = outputBundle) {
   });
 }
 
+function argToArray(arg) {
+  return Array.isArray(arg) ? arg : arg.split(',');
+}
+
 module.exports = buildBundle;
