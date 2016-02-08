@@ -50,8 +50,8 @@ public class DevServerHelper {
   public static final String RELOAD_APP_EXTRA_JS_PROXY = "jsproxy";
   private static final String RELOAD_APP_ACTION_SUFFIX = ".RELOAD_APP_ACTION";
 
-  private static final String EMULATOR_LOCALHOST = "10.0.2.2:8081";
-  private static final String GENYMOTION_LOCALHOST = "10.0.3.2:8081";
+  private static final String EMULATOR_LOCALHOST = "10.10.1.175:8081";
+  private static final String GENYMOTION_LOCALHOST = "10.10.1.175:8081";
   private static final String DEVICE_LOCALHOST = "localhost:8081";
 
   private static final String BUNDLE_URL_FORMAT =
