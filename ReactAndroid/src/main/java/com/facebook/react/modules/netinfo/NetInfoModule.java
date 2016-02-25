@@ -109,7 +109,9 @@ public class NetInfoModule extends ReactContextBaseJavaModule
   }
 
   private void unregisterReceiver() {
-    getReactApplicationContext().unregisterReceiver(mConnectivityBroadcastReceiver);
+    try {
+      getReactApplicationContext().unregisterReceiver(mConnectivityBroadcastReceiver);
+    } catch (Throwable ignored) {  }
   }
 
   private void updateAndSendConnectionType() {
