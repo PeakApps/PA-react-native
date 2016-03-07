@@ -80,7 +80,7 @@ public class ReactScrollViewHelper {
 
     /* package */ static void emitOverScrollEvent(ReactScrollView scrollView, float overScrollX, float overScrollY, boolean down) {
         ReactContext reactContext = (ReactContext) scrollView.getContext();
-        reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(new OverScrollEvent(scrollView.getId(), SystemClock.uptimeMillis(), overScrollX, overScrollY, down));
+        reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(OverScrollEvent.obtain(scrollView.getId(), SystemClock.uptimeMillis(), overScrollX, overScrollY, down));
     }
 
     /* package */ static void emitOverScrollEndedEvent(ReactScrollView scrollView) {
