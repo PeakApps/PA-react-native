@@ -107,7 +107,12 @@ task prepareGlog(dependsOn: downloadGlog, type: Copy) {
     into "$thirdPartyNdkDir/glog"
 }
 
-task downloadJSCHeaders(type: Download) {
+task mkJSCdir() << {
+    def output = new File(downloadsDir, 'jsc')
+    output.mkdirs()
+}
+
+task downloadJSCHeaders(type: Download, dependsOn: 'mkJSCdir') {
     def jscAPIBaseURL = 'https://svn.webkit.org/repository/webkit/!svn/bc/174650/trunk/Source/JavaScriptCore/API/'
     def jscHeaderFiles = ['JSBase.h', 'JSContextRef.h', 'JSObjectRef.h', 'JSRetainPtr.h', 'JSStringRef.h', 'JSValueRef.h', 'WebKitAvailability.h']
     def output = new File(downloadsDir, 'jsc')
@@ -201,6 +206,7 @@ task cleanReactNdkLib(type: Exec) {
             "THIRD_PARTY_NDK_DIR=$buildDir/third-party-ndk",
             '-C', file('src/main/jni/react/jni').absolutePath,
             'clean'
+    ignoreExitValue true
 }
 
 task packageReactNdkLibs(dependsOn: buildReactNdkLib, type: Copy) {
