@@ -17,9 +17,11 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.facebook.catalyst.views.webview.events.TopLoadingProgressEvent;
 import com.facebook.catalyst.views.webview.events.TopLoadingErrorEvent;
 import com.facebook.catalyst.views.webview.events.TopLoadingFinishEvent;
 import com.facebook.catalyst.views.webview.events.TopLoadingStartEvent;
@@ -215,6 +217,7 @@ public class ReactWebViewManager extends SimpleViewManager<WebView> {
 
     private void cleanupCallbacksAndDestroy() {
       setWebViewClient(null);
+      setWebChromeClient(new WebChromeClient());
       destroy();
     }
   }
@@ -302,6 +305,7 @@ public class ReactWebViewManager extends SimpleViewManager<WebView> {
   protected void addEventEmitters(ThemedReactContext reactContext, WebView view) {
     // Do not register default touch emitter and let WebView implementation handle touches
     view.setWebViewClient(new ReactWebViewClient());
+    view.setWebChromeClient(new ReactWebChromeClient());
   }
 
   @Override
@@ -332,5 +336,20 @@ public class ReactWebViewManager extends SimpleViewManager<WebView> {
     super.onDropViewInstance(webView);
     ((ThemedReactContext) webView.getContext()).removeLifecycleEventListener((ReactWebView) webView);
     ((ReactWebView) webView).cleanupCallbacksAndDestroy();
+  }
+
+
+  private static class ReactWebChromeClient extends WebChromeClient {
+
+    @Override
+    public void onProgressChanged(WebView view, int newProgress) {
+      super.onProgressChanged(view, newProgress);
+      ReactContext reactContext = (ReactContext) view.getContext();
+      EventDispatcher eventDispatcher =
+              reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher();
+      WritableMap map = Arguments.createMap();
+      map.putInt("progress", newProgress);
+      eventDispatcher.dispatchEvent(new TopLoadingProgressEvent(view.getId(), System.currentTimeMillis(), map));
+    }
   }
 }
