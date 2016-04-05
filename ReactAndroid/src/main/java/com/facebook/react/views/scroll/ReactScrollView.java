@@ -64,6 +64,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   private boolean mCurrentTouchPassedXThreshold = false;
 
   private boolean mOverscrollXStarted = false;
+  private boolean mOverscrollYStarted = false;
 
   public ReactScrollView(Context context) {
     super(context);
@@ -163,11 +164,12 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
       if (Math.abs(mInitialX - ev.getRawX()) > mTouchSlop && !mCurrentTouchPassedYThreshold) {
         mCurrentTouchPassedXThreshold = true;
       }
-      if (mOverScrollY) {
+      if (mOverScrollY && !mOverscrollXStarted) {
         boolean overScrollDown = (getChildAt(0).getHeight() - getScrollY()) == getHeight();
         if (!ViewCompat.canScrollVertically(this, -1) || getScrollY() == 0 || (overScrollDown)) {
           float dragDistance = mInitialY - ev.getRawY();
           if (dragDistance < -mTouchSlop || (overScrollDown && dragDistance > mTouchSlop)) {
+            mOverscrollYStarted = true;
             if (mStartY != -1f) {
               if (overScrollDown) {
                 mOverScrollDistanceY += (mStartY - ev.getRawY());
@@ -184,7 +186,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
           mOverScrollDistanceY = 0f;
         }
       }
-      if (mOverScrollX && !mCurrentTouchPassedYThreshold) {
+      if (mOverScrollX && !mCurrentTouchPassedYThreshold && !mOverscrollYStarted) {
         float dragDistance = mInitialX - ev.getRawX();
         if (dragDistance < -mTouchSlop) {
           mOverscrollXStarted = true;
@@ -203,7 +205,9 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
       mStartY = -1f;
       mCurrentTouchPassedYThreshold = false;
       mCurrentTouchPassedXThreshold = false;
+      mOverscrollYStarted = false;
       mStartX = -1f;
+      mOverScrollDistanceX = 0f;
       if (mOverScrollY && mOverScrollDistanceY > 0f) {
         ReactScrollViewHelper.emitOverScrollEndedEvent(this);
 		mDragging = false;
@@ -217,6 +221,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
         ReactScrollViewHelper.emitOverScrollEndedEvent(this);
         mOverScrollDistanceX = 0f;
         mOverscrollXStarted = false;
+
         return true;
       }
     }
