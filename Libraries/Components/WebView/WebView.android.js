@@ -44,6 +44,7 @@ var WebView = React.createClass({
     onLoadEnd: PropTypes.func,
     onLoadStart: PropTypes.func,
     onError: PropTypes.func,
+    onProgress: PropTypes.func,
     url: PropTypes.string,
     html: PropTypes.string,
     automaticallyAdjustContentInsets: PropTypes.bool,
@@ -143,6 +144,7 @@ var WebView = React.createClass({
         onLoadingStart={this.onLoadingStart}
         onLoadingFinish={this.onLoadingFinish}
         onLoadingError={this.onLoadingError}
+        onLoadingProgress={this.onProgress}
         testID={this.props.testID}
       />;
 
@@ -209,6 +211,9 @@ var WebView = React.createClass({
       lastErrorEvent: event.nativeEvent,
       viewState: WebViewState.ERROR
     });
+  },
+  onProgress: function(event) {
+    this.props.onProgress && this.props.onProgress(event);
   },
 
   onLoadingFinish: function(event) {

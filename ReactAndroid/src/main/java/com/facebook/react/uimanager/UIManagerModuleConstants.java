@@ -76,6 +76,7 @@ import com.facebook.react.uimanager.events.TouchEventType;
         .put("topLoadingStart", MapBuilder.of("registrationName", "onLoadingStart"))
         .put("topLoadingFinish", MapBuilder.of("registrationName", "onLoadingFinish"))
         .put("topLoadingError", MapBuilder.of("registrationName", "onLoadingError"))
+        .put("topLoadingProgress", MapBuilder.of("registrationName", "onLoadingProgress"))
         .put("topLayout", MapBuilder.of("registrationName", "onLayout"))
         .build();
   }
