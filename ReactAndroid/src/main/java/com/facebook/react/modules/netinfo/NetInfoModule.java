@@ -42,7 +42,7 @@ public class NetInfoModule extends ReactContextBaseJavaModule
       "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />";
 
   private final ConnectivityManager mConnectivityManager;
-  private final ConnectivityManagerCompat mConnectivityManagerCompat;
+  //private final ConnectivityManagerCompat mConnectivityManagerCompat; // Due to https://github.com/facebook/react-native/issues/6152, already fixed in 0.22
   private final ConnectivityBroadcastReceiver mConnectivityBroadcastReceiver;
   private boolean mNoNetworkPermission = false;
 
@@ -52,7 +52,7 @@ public class NetInfoModule extends ReactContextBaseJavaModule
     super(reactContext);
     mConnectivityManager =
         (ConnectivityManager) reactContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-    mConnectivityManagerCompat = new ConnectivityManagerCompat();
+  //  mConnectivityManagerCompat = new ConnectivityManagerCompat(); // Due to https://github.com/facebook/react-native/issues/6152, already fixed in 0.22
     mConnectivityBroadcastReceiver = new ConnectivityBroadcastReceiver();
   }
 
@@ -99,7 +99,7 @@ public class NetInfoModule extends ReactContextBaseJavaModule
       FLog.e(ReactConstants.TAG, MISSING_PERMISSION_MESSAGE);
       return;
     }
-    successCallback.invoke(mConnectivityManagerCompat.isActiveNetworkMetered(mConnectivityManager));
+    successCallback.invoke(ConnectivityManagerCompat.isActiveNetworkMetered(mConnectivityManager)); //// Due to https://github.com/facebook/react-native/issues/6152, already fixed in 0.22
   }
 
   private void registerReceiver() {
