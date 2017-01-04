@@ -351,7 +351,17 @@ public class ReactImageView extends GenericDraweeView {
     // Resizing is inferior to scaling. See http://frescolib.org/docs/resizing-rotating.html#_
     // We resize here only for images likely to be from the device's camera, where the app developer
     // has no control over the original size
-    return uri != null && !uri.getLastPathSegment().endsWith("gif");// && (UriUtil.isLocalContentUri(uri) || UriUtil.isLocalFileUri(uri));
+
+    boolean out = false;
+    if ( uri != null )
+    {
+      String suffix = uri.getLastPathSegment();
+      if ( suffix != null )
+      {
+        out = !suffix.endsWith("gif");
+      }
+    }
+    return out; // Nitzan: crashes sometimes on NullPointer on getLastPathSegment: uri != null && !uri.getLastPathSegment().endsWith("gif");// && (UriUtil.isLocalContentUri(uri) || UriUtil.isLocalFileUri(uri));
   }
 
   private static int getResourceDrawableId(Context context, @Nullable String name) {
