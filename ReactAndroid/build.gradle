@@ -40,6 +40,16 @@ task prepareBoost(dependsOn: downloadBoost, type: Copy) {
 }
 
 task prepareBoostFromLocal(type: Copy) {
+    if ( !file(project.getProperty('react_alt_boost_location') + 'boost_1_57_0.zip').exists() ){
+        println 'Downloading boost into ' + project.getProperty('react_alt_boost_location')
+        download {
+            src 'https://sourceforge.mirrorservice.org/b/bo/boost/boost/1.57.0/boost_1_57_0.zip'
+            dest project.getProperty('react_alt_boost_location') + 'boost_1_57_0.zip'
+            overwrite false
+        }
+    } else {
+        println 'Boost detected at ' + project.getProperty('react_alt_boost_location')
+    }
     from zipTree(new File(project.getProperty('react_alt_boost_location'), 'boost_1_57_0.zip'))
     from 'src/main/jni/third-party/boost/Android.mk'
     include 'boost_1_57_0/boost/**/*.hpp', 'Android.mk'
