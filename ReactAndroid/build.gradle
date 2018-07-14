@@ -144,6 +144,9 @@ task downloadJSCHeaders(type: Download, dependsOn: 'mkJSCdir') {
 // Create Android.mk library module based on so files from mvn + include headers fetched from webkit.org
 task prepareJSC(dependsOn: downloadJSCHeaders) << {
     copy {
+        println "*8*8"
+        println configurations
+        println downloadJSCHeaders.dest
         from zipTree(configurations.compile.fileCollection { dep -> dep.name == 'android-jsc' }.singleFile)
         from {downloadJSCHeaders.dest}
         from 'src/main/jni/third-party/jsc/Android.mk'
@@ -276,31 +279,22 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'src/main/third-party/java/infer-annotations/', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:27.0.2'
-    compile 'com.android.support:recyclerview-v7:23.0.1' // Stick to 23.0.1 because of shit with NotAnimatedItemAnimator.java not compiling
-    compile 'com.facebook.fresco:fresco:0.8.1'
-    compile 'com.facebook.fresco:imagepipeline-okhttp:0.8.1'
-    compile 'com.facebook.stetho:stetho:1.2.0'
-    compile 'com.facebook.stetho:stetho-okhttp:1.2.0'
-    compile 'com.fasterxml.jackson.core:jackson-core:2.2.3'
-    compile 'com.google.code.findbugs:jsr305:3.0.0'
-    compile 'com.squareup.okhttp:okhttp:2.5.0'
-    compile 'com.squareup.okhttp:okhttp-ws:2.5.0'
-    compile 'com.squareup.okio:okio:1.6.0'
-    compile 'org.webkit:android-jsc:r174650'
+    implementation fileTree(dir: 'src/main/third-party/java/infer-annotations/', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:27.0.2'
+    implementation 'com.android.support:recyclerview-v7:23.0.1' // Stick to 23.0.1 because of shit with NotAnimatedItemAnimator.java not compiling
+    implementation 'com.facebook.fresco:fresco:0.8.1'
+    implementation 'com.facebook.fresco:imagepipeline-okhttp:0.8.1'
+    implementation 'com.facebook.stetho:stetho:1.2.0'
+    implementation 'com.facebook.stetho:stetho-okhttp:1.2.0'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.2.3'
+    implementation 'com.google.code.findbugs:jsr305:3.0.0'
+    implementation 'com.squareup.okhttp:okhttp:2.5.0'
+    implementation 'com.squareup.okhttp:okhttp-ws:2.5.0'
+    implementation 'com.squareup.okio:okio:1.6.0'
+    implementation 'org.webkit:android-jsc:r174650'
   // Adding Firebase due to: http://stackoverflow.com/q/38595171/606351
-    compile 'com.google.firebase:firebase-core:9.2.1'
+    implementation 'com.google.firebase:firebase-core:9.2.1'
 
-    testCompile "junit:junit:${JUNIT_VERSION}"
-    testCompile "org.powermock:powermock-api-mockito:${POWERMOCK_VERSION}"
-    testCompile "org.powermock:powermock-module-junit4-rule:${POWERMOCK_VERSION}"
-    testCompile "org.powermock:powermock-classloading-xstream:${POWERMOCK_VERSION}"
-    testCompile "org.mockito:mockito-core:${MOCKITO_CORE_VERSION}"
-    testCompile "org.easytesting:fest-assert-core:${FEST_ASSERT_CORE_VERSION}"
-    testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-
-    androidTestCompile "com.android.support.test:testing-support-lib:0.1"
 }
 
 apply from: 'release.gradle'
