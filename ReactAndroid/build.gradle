@@ -240,7 +240,7 @@ android {
     buildToolsVersion '27.0.3'
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
@@ -290,7 +290,7 @@ dependencies {
     compile 'com.squareup.okio:okio:1.6.0'
     compile 'org.webkit:android-jsc:r174650'
   // Adding Firebase due to: http://stackoverflow.com/q/38595171/606351
-    compile 'com.google.firebase:firebase-core:9.2.1'
+    compile 'com.google.firebase:firebase-core:16.0.1'
 
     testCompile "junit:junit:${JUNIT_VERSION}"
     testCompile "org.powermock:powermock-api-mockito:${POWERMOCK_VERSION}"
