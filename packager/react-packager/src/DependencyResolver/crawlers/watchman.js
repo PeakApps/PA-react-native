@@ -36,6 +36,10 @@ function watchmanRecReadDir(roots, {ignore, fileWatcher, exts}) {
             }
           }
 
+	  if (dirExpr.length == 1) {
+        	dirExpr.push('exists');
+      	  }
+
           const cmd = Promise.denodeify(watcher.client.command.bind(watcher.client));
           return cmd(['query', watchedRoot, {
             'suffix': exts,
