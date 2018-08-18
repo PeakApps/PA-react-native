@@ -28,10 +28,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.PixelFormat;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Debug;
 import android.os.Environment;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
 import com.facebook.common.logging.FLog;
@@ -40,7 +43,6 @@ import com.facebook.react.R;
 import com.facebook.react.bridge.CatalystInstance;
 import com.facebook.react.bridge.DefaultNativeModuleCallExceptionHandler;
 import com.facebook.react.bridge.JavaJSExecutor;
-import com.facebook.react.bridge.NativeModuleCallExceptionHandler;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.UiThreadUtil;
@@ -50,6 +52,8 @@ import com.facebook.react.common.ShakeDetector;
 import com.facebook.react.common.futures.SimpleSettableFuture;
 import com.facebook.react.devsupport.StackTraceHelper.StackFrame;
 import com.facebook.react.modules.debug.DeveloperSettings;
+
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
  * Interface for accessing and interacting with development features. Following features
@@ -110,12 +114,18 @@ public class DevSupportManagerImpl implements DevSupportManager {
   private boolean mIsDevSupportEnabled = false;
   private boolean mIsCurrentlyProfiling = false;
   private int     mProfileIndex = 0;
+  private int     mRedboxWindowType = LayoutParams.TYPE_SYSTEM_ALERT;
 
   public DevSupportManagerImpl(
       Context applicationContext,
       ReactInstanceDevCommandsHandler reactInstanceCommandsHandler,
       @Nullable String packagerPathForJSBundleName,
       boolean enableOnCreate) {
+
+    if ( Build.VERSION.SDK_INT >=26 ){ // >= Oreo
+      mRedboxWindowType = LayoutParams.TYPE_APPLICATION_OVERLAY;
+    }
+
     mReactInstanceCommandsHandler = reactInstanceCommandsHandler;
     mApplicationContext = applicationContext;
     mJSAppBundleName = packagerPathForJSBundleName;
@@ -226,7 +236,12 @@ public class DevSupportManagerImpl implements DevSupportManager {
           public void run() {
             if (mRedBoxDialog == null) {
               mRedBoxDialog = new RedBoxDialog(mApplicationContext, DevSupportManagerImpl.this);
-              mRedBoxDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+              mRedBoxDialog.getWindow().setType(mRedboxWindowType);
+//              mRedBoxDialog.getWindow().setAttributes( new LayoutParams(WRAP_CONTENT,
+//                      WRAP_CONTENT,
+//                      mRedboxWindowType,
+//                      LayoutParams.FLAG_NOT_TOUCHABLE | LayoutParams.FLAG_LAYOUT_IN_SCREEN | LayoutParams.FLAG_NOT_FOCUSABLE,
+//                      PixelFormat.TRANSLUCENT));
             }
             if (mRedBoxDialog.isShowing()) {
               // Sometimes errors cause multiple errors to be thrown in JS in quick succession. Only
@@ -366,7 +381,12 @@ public class DevSupportManagerImpl implements DevSupportManager {
               }
             })
             .create();
-    mDevOptionsDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+    mDevOptionsDialog.getWindow().setType(mRedboxWindowType);
+//    mDevOptionsDialog.getWindow().setAttributes( new LayoutParams(WRAP_CONTENT,
+//            WRAP_CONTENT,
+//            mRedboxWindowType,
+//            LayoutParams.FLAG_NOT_TOUCHABLE | LayoutParams.FLAG_LAYOUT_IN_SCREEN | LayoutParams.FLAG_NOT_FOCUSABLE,
+//            PixelFormat.TRANSLUCENT));
     mDevOptionsDialog.show();
   }
 
@@ -534,7 +554,12 @@ public class DevSupportManagerImpl implements DevSupportManager {
         mIsUsingJSProxy ? R.string.catalyst_remotedbg_message : R.string.catalyst_jsload_message));
     progressDialog.setIndeterminate(true);
     progressDialog.setCancelable(false);
-    progressDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+    progressDialog.getWindow().setType(mRedboxWindowType);
+//    progressDialog.getWindow().setAttributes( new LayoutParams(WRAP_CONTENT,
+//            WRAP_CONTENT,
+//            mRedboxWindowType,
+//            LayoutParams.FLAG_NOT_TOUCHABLE | LayoutParams.FLAG_LAYOUT_IN_SCREEN | LayoutParams.FLAG_NOT_FOCUSABLE,
+//            PixelFormat.TRANSLUCENT));
     progressDialog.show();
 
     if (mIsUsingJSProxy) {
